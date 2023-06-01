@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Video Chat</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="video-chat">
+        <h2>Video Chat</h2>
+        <form id="email-form">
+            <input type="email" id="email-input" placeholder="Enter your email" required> <br>
+            <button type="submit" id="start-call-btn">Start Call</button>
+        </form>
+        <button id="accept-call-btn" style="display: none;">Accept</button>
+        <button id="reject-call-btn" style="display: none;">Reject</button>
+        <video id="local-video" autoplay></video>
+        <video id="remote-video" autoplay></video>
+    </div>
+
+
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="/static/video_chat.js"></script>
+</body>
+
+</html>
