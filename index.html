@@ -59,14 +59,15 @@
             <!-- {% if page == 'home' %} -->
             <div class="posts">
                 <h1>Posts</h1>
-                <div class="wrapper">
-                    <!-- {% for post in posts %} -->
-                    <div class="post">
+                <!-- {% for post in posts %} -->
+                <div class="post">
+                    <div class="post__inner">
                         <img src="assets/img/ak.jpg"> <!--{{ url_for('static', filename='uploads/raf.jpg') }}-->
                         <div class="description">
                             <div class="box">
                                 <div class="title">
-                                    <h2>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</h2> <!--{{ post.title }}-->
+                                    <h2>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</h2>
+                                    <!--{{ post.title }}-->
                                 </div>
                                 <div class="comment">
                                     <button id="commentsButton">
@@ -74,10 +75,13 @@
                                     </button>
                                 </div>
                             </div>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti, possimus ratione, quisquam cumque dolor incidunt ipsam natus fuga sapiente eveniet sunt maiores consectetur assumenda error vitae voluptates, voluptate temporibus ipsum?</p> <!--{{ post.description }}-->
+                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti, possimus ratione,
+                                quisquam
+                                cumque dolor incidunt ipsam natus fuga sapiente eveniet sunt maiores consectetur
+                                assumenda
+                                error vitae voluptates, voluptate temporibus ipsum?</p> <!--{{ post.description }}-->
                         </div>
                     </div>
-
                     <!-- COMMENTS SECTION -->
                     <div class="comments">
                         <!-- {% for comment in post.comments %} -->
@@ -93,8 +97,48 @@
                             <input type="submit" value="Submit">
                         </form>
                     </div>
-                    <!-- {% endfor %} -->
                 </div>
+                <div class="post">
+                    <div class="post__inner">
+                        <img src="assets/img/ak.jpg"> <!--{{ url_for('static', filename='uploads/raf.jpg') }}-->
+                        <div class="description">
+                            <div class="box">
+                                <div class="title">
+                                    <h2>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</h2>
+                                    <!--{{ post.title }}-->
+                                </div>
+                                <div class="comment">
+                                    <button id="commentsButton">
+                                        <i class="fa-regular fa-comment"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti, possimus ratione,
+                                quisquam
+                                cumque dolor incidunt ipsam natus fuga sapiente eveniet sunt maiores consectetur
+                                assumenda
+                                error vitae voluptates, voluptate temporibus ipsum?</p> <!--{{ post.description }}-->
+                        </div>
+                    </div>
+                    <!-- COMMENTS SECTION -->
+                    <div class="comments">
+                        <!-- {% for comment in post.comments %} -->
+                        <div class="comment">
+                            <p><strong></strong></p> <!--{{ comment.author.email }}-->
+                            <p></p> <!--{{ comment.content }}-->
+                        </div>
+                        <!-- {% endfor %} -->
+                        <!-- COMMENT FORM -->
+                        <form method="POST" action="/{{ post.id }}/comment">
+                            <textarea name="content" placeholder="Enter your comment"></textarea>
+                            <br>
+                            <input type="submit" value="Submit">
+                        </form>
+                    </div>
+                </div>
+
+
+                <!-- {% endfor %} -->
             </div>
             <!-- {% endif %} -->
         </div>
