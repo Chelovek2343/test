@@ -108,30 +108,33 @@ select {
   font-size: 40px;
 }
 .posts .post {
+  display: flex;
+}
+.posts .post__inner {
   background: #fff;
   width: 340px;
   margin: 40px auto 0;
   border-radius: 10px;
   padding-bottom: 20px;
 }
-.posts .post img {
+.posts .post__inner img {
   width: 100%;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 }
-.posts .post .description {
+.posts .post__inner .description {
   padding: 10px;
 }
-.posts .post .description .box {
+.posts .post__inner .description .box {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 }
-.posts .post .description .box button {
+.posts .post__inner .description .box button {
   cursor: pointer;
 }
-.posts .post .description p {
+.posts .post__inner .description p {
   font-size: 15px;
 }
 .posts .comments {
