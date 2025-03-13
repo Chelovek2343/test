@@ -1,109 +1,77 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState } from 'react';
+import axios from 'axios';
 
 function App() {
-  const [formData, setFormData] = useState({
-    age: "",
-    weight: "",
-    height: "",
-    activityLevel: "moderate", // Default activity level
-  });
+  const [age, setAge] = useState('');
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [activity, setActivity] = useState('moderate');
   const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
 
-  // Handle form field changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  // Validation function to check inputs
-  const moderate = () => {
-    const { age, weight, height } = formData;
-    if (!age || !weight || !height) {
-      setError("Please fill in all the fields!");
-      return false;
-    }
-
-    if (isNaN(age) || isNaN(weight) || isNaN(height)) {
-      setError("Please enter valid numbers for age, weight, and height!");
-      return false;
-    }
-
-    return true;
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(""); // Reset error message
-    setResult(null); // Reset result
-
-    // Validate form data before sending to backend
-    if (!moderate()) {
-      return;
-    }
+    const userData = { age, weight, height, activity };
 
     try {
-      // Send POST request to Flask API with form data
-      const response = await axios.post("http://127.0.0.1:5000/predict", formData, {
-        headers: { "Content-Type": "application/json" }
-      });
-      setResult(response.data); // Set response data in state
-    } catch (err) {
-      setError("Error connecting to the server.");
+      const response = await axios.post('http://127.0.0.1:5000/predict', userData);
+      setResult(response.data);
+    } catch (error) {
+      console.error("There was an error with the API request!", error);
     }
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Health Dashboard</h2>
+    <div className="App">
+      <h1>Personalized Health Dashboard</h1>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="age"
-          placeholder="Age"
-          onChange={handleChange}
+        <label>Age: </label>
+        <input 
+          type="number" 
+          value={age} 
+          onChange={(e) => setAge(e.target.value)} 
         />
-        <input
-          type="text"
-          name="weight"
-          placeholder="Weight (kg)"
-          onChange={handleChange}
+        <br />
+        
+        <label>Weight (kg): </label>
+        <input 
+          type="number" 
+          value={weight} 
+          onChange={(e) => setWeight(e.target.value)} 
         />
-        <input
-          type="text"
-          name="height"
-          placeholder="Height (m)"
-          onChange={handleChange}
+        <br />
+        
+        <label>Height (m): </label>
+        <input 
+          type="number" 
+          step="0.01" 
+          value={height} 
+          onChange={(e) => setHeight(e.target.value)} 
         />
+        <br />
+        
+        <label>Activity Level: </label>
+        <select 
+          value={activity} 
+          onChange={(e) => setActivity(e.target.value)}
+        >
+          <option value="low">Low</option>
+          <option value="moderate">Moderate</option>
+          <option value="active">Active</option>
+        </select>
+        <br />
 
-        {/* Activity Level Dropdown */}
-        <div>
-          <label>Activity Level:</label>
-          <select
-            name="activityLevel"
-            value={formData.activityLevel}
-            onChange={handleChange}
-          >
-            <option value="sedentary">Sedentary</option>
-            <option value="moderate">Moderate</option>
-            <option value="active">Active</option>
-          </select>
-        </div>
-
-        <button type="submit">Calculate BMI</button>
+        <button type="submit">Submit</button>
       </form>
 
-      {/* Display Results */}
       {result && (
         <div>
-          <h3>BMI: {result.bmi}</h3>
-          <p>{result.activityMessage}</p>
+          <h2>Results:</h2>
+          <p>BMI: {result.bmi}</p>
+          <p>Risk Score: {result.risk_score}</p>
+          <p>Risk Category: {result.risk_category}</p>
         </div>
       )}
-
-      {/* Display Errors */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }
