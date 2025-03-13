@@ -1,77 +1,100 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
 function App() {
-  const [age, setAge] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [activity, setActivity] = useState('moderate');
+  const [formData, setFormData] = useState({
+    age: "",
+    weight: "",
+    height: "",
+    activityLevel: "moderate", // Added activity level state
+  });
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(""); 
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    const userData = { age, weight, height, activity };
+  // Moderation function to validate inputs before submission
+  const moderate = () => {
+    const { age, weight, height, activityLevel } = formData;
+    
+    // Simple validation check for required fields
+    if (!age || !weight || !height) {
+      setError("Please fill in all the fields!");
+      return false;
+    }
+
+    if (isNaN(age) || isNaN(weight) || isNaN(height)) {
+      setError("Please enter valid numbers for age, weight, and height!");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setResult(null);
+
+    // Validate before submitting
+    if (!moderate()) {
+      return;
+    }
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/predict', userData);
+      const response = await axios.post("http://127.0.0.1:5000/predict", formData, {
+        headers: { "Content-Type": "application/json" }
+      });
       setResult(response.data);
-    } catch (error) {
-      console.error("There was an error with the API request!", error);
+    } catch (err) {
+      setError("Error connecting to the server.");
     }
   };
 
   return (
-    <div className="App">
-      <h1>Personalized Health Dashboard</h1>
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h2>Health Dashboard</h2>
       <form onSubmit={handleSubmit}>
-        <label>Age: </label>
-        <input 
-          type="number" 
-          value={age} 
-          onChange={(e) => setAge(e.target.value)} 
+        <input
+          type="text"
+          name="age"
+          placeholder="Age"
+          onChange={handleChange}
         />
-        <br />
-        
-        <label>Weight (kg): </label>
-        <input 
-          type="number" 
-          value={weight} 
-          onChange={(e) => setWeight(e.target.value)} 
+        <input
+          type="text"
+          name="weight"
+          placeholder="Weight (kg)"
+          onChange={handleChange}
         />
-        <br />
-        
-        <label>Height (m): </label>
-        <input 
-          type="number" 
-          step="0.01" 
-          value={height} 
-          onChange={(e) => setHeight(e.target.value)} 
+        <input
+          type="text"
+          name="height"
+          placeholder="Height (m)"
+          onChange={handleChange}
         />
-        <br />
         
-        <label>Activity Level: </label>
-        <select 
-          value={activity} 
-          onChange={(e) => setActivity(e.target.value)}
-        >
-          <option value="low">Low</option>
-          <option value="moderate">Moderate</option>
-          <option value="active">Active</option>
-        </select>
-        <br />
+        {/* Activity Level Dropdown */}
+        <div>
+          <label>Activity Level:</label>
+          <select
+            name="activityLevel"
+            value={formData.activityLevel}
+            onChange={handleChange}
+          >
+            <option value="sedentary">Sedentary</option>
+            <option value="moderate">Moderate</option>
+            <option value="active">Active</option>
+          </select>
+        </div>
 
-        <button type="submit">Submit</button>
+        <button type="submit">Calculate BMI</button>
       </form>
 
-      {result && (
-        <div>
-          <h2>Results:</h2>
-          <p>BMI: {result.bmi}</p>
-          <p>Risk Score: {result.risk_score}</p>
-          <p>Risk Category: {result.risk_category}</p>
-        </div>
-      )}
+      {result && <h3>BMI: {result.bmi}</h3>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }
