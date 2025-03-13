@@ -1,39 +1,41 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS
+from flask_cors import CORS
+import math
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all domains (you can restrict it to specific origins later)
+CORS(app)  # Allow requests from frontend
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    data = request.json  # Get data sent in JSON format
+def calculate_bmi(weight, height):
+    return round(weight / (height ** 2), 2)
 
-    # Check if all fields are provided
-    if not data or not data.get("age") or not data.get("weight") or not data.get("height"):
-        return jsonify({"error": "Missing required fields"}), 400
-
-    # Get data from the request
-    age = float(data.get("age"))
-    weight = float(data.get("weight"))
-    height = float(data.get("height"))
-    activity_level = data.get("activityLevel", "moderate")
-
-    # Simple BMI Calculation
-    bmi = round(weight / (height ** 2), 2)
-
-    # Provide activity-level-based suggestions
-    if activity_level == "sedentary":
-        activity_message = "Consider adding light physical activity to your routine."
-    elif activity_level == "moderate":
-        activity_message = "Great! Keep up the moderate activity."
+def get_health_tips(bmi, activity_level):
+    if bmi < 18.5:
+        return "Underweight: Increase your calorie intake with healthy foods."
+    elif 18.5 <= bmi < 24.9:
+        return "Normal weight: Maintain a balanced diet and regular exercise."
+    elif 25 <= bmi < 29.9:
+        return "Overweight: Consider adjusting your diet and increasing activity."
     else:
-        activity_message = "You're active! Keep challenging yourself."
+        return "Obese: Consult a healthcare provider for personalized advice."
 
-    return jsonify({
-        "bmi": bmi,
-        "activityMessage": activity_message,
-        "message": "Prediction successful!"
-    })
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        data = request.get_json()
+        weight = float(data.get('weight'))
+        height = float(data.get('height'))
+        activity_level = data.get('activity', 'moderate')
 
-if __name__ == "__main__":
+        if weight <= 0 or height <= 0:
+            return jsonify({'error': 'Invalid weight or height'}), 400
+
+        bmi = calculate_bmi(weight, height)
+        recommendation = get_health_tips(bmi, activity_level)
+
+        return jsonify({'bmi': bmi, 'recommendation': recommendation})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
     app.run(debug=True)
