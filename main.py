@@ -1,32 +1,30 @@
 from flask import Flask, request, jsonify
-import numpy as np
-import joblib  # For loading the ML model (later)
-import os
+from flask_cors import CORS  # Enable CORS
 
 app = Flask(__name__)
+CORS(app)  # Allow frontend requests
 
-# Sample Health Risk Prediction Model (Placeholder)
-def predict_health_risk(data):
-    age, weight, height, activity = data["age"], data["weight"], data["height"], data["activity"]
-    bmi = weight / (height ** 2)
-    
-    # Placeholder logic for risk (Replace with AI model later)
-    risk_score = (age / 100) + (bmi / 40) - (0.1 if activity == "active" else 0)
-
-    if risk_score > 0.8:
-        risk = "High"
-    elif risk_score > 0.5:
-        risk = "Moderate"
-    else:
-        risk = "Low"
-
-    return {"bmi": round(bmi, 2), "risk_score": round(risk_score, 2), "risk_category": risk}
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "Backend is running!"})
 
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.json
-    result = predict_health_risk(data)
-    return jsonify(result)
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    age = data.get("age")
+    weight = data.get("weight")
+    height = data.get("height")
+
+    if not age or not weight or not height:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    # Simple BMI Calculation
+    bmi = round(float(weight) / (float(height) ** 2), 2)
+
+    return jsonify({"bmi": bmi, "message": "Prediction successful!"})
 
 if __name__ == "__main__":
     app.run(debug=True)
