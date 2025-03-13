@@ -1,111 +1,75 @@
 import React, { useState } from "react";
-import axios from "axios";
+import Chart from "chart.js/auto";
 
-function App() {
-  const [formData, setFormData] = useState({
-    age: "",
-    weight: "",
-    height: "",
-    activityLevel: "moderate", // Default activity level
-  });
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+const App = () => {
+    const [formData, setFormData] = useState({ weight: "", height: "", activity: "moderate" });
+    const [bmiData, setBmiData] = useState(null);
+    const [error, setError] = useState("");
+    const [chartInstance, setChartInstance] = useState(null);
 
-  // Handle form field changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-  // Validation function to check inputs
-  const moderate = () => {
-    const { age, weight, height } = formData;
-    if (!age || !weight || !height) {
-      setError("Please fill in all the fields!");
-      return false;
-    }
+    const fetchData = async () => {
+        setError("");
+        try {
+            const response = await fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
 
-    if (isNaN(age) || isNaN(weight) || isNaN(height)) {
-      setError("Please enter valid numbers for age, weight, and height!");
-      return false;
-    }
+            const data = await response.json();
+            if (response.ok) {
+                setBmiData(data);
+                updateChart(data.bmi);
+            } else {
+                setError(data.error || "Something went wrong.");
+            }
+        } catch (error) {
+            setError("Server error. Please try again.");
+        }
+    };
 
-    return true;
-  };
+    const updateChart = (bmi) => {
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(""); // Reset error message
-    setResult(null); // Reset result
+        const ctx = document.getElementById("bmiChart").getContext("2d");
+        const newChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: ["Your BMI"],
+                datasets: [{ label: "BMI Value", data: [bmi], backgroundColor: "blue" }],
+            },
+        });
 
-    // Validate form data before sending to backend
-    if (!moderate()) {
-      return;
-    }
+        setChartInstance(newChart);
+    };
 
-    try {
-      // Send POST request to Flask API with form data
-      const response = await axios.post("http://127.0.0.1:5000/predict", formData, {
-        headers: { "Content-Type": "application/json" }
-      });
-      setResult(response.data); // Set response data in state
-    } catch (err) {
-      setError("Error connecting to the server.");
-    }
-  };
-
-  return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Health Dashboard</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="age"
-          placeholder="Age"
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="weight"
-          placeholder="Weight (kg)"
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="height"
-          placeholder="Height (m)"
-          onChange={handleChange}
-        />
-        
-        {/* Activity Level Dropdown */}
-        <div>
-          <label>Activity Level:</label>
-          <select
-            name="activityLevel"
-            value={formData.activityLevel}
-            onChange={handleChange}
-          >
-            <option value="sedentary">Sedentary</option>
-            <option value="moderate">Moderate</option>
-            <option value="active">Active</option>
-          </select>
+    return (
+        <div className="container">
+            <h1>Health Dashboard</h1>
+            <input type="number" name="weight" placeholder="Weight (kg)" value={formData.weight} onChange={handleChange} />
+            <input type="number" name="height" placeholder="Height (m)" value={formData.height} onChange={handleChange} />
+            <select name="activity" value={formData.activity} onChange={handleChange}>
+                <option value="sedentary">Sedentary</option>
+                <option value="moderate">Moderate</option>
+                <option value="active">Active</option>
+            </select>
+            <button onClick={fetchData}>Calculate BMI</button>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {bmiData && (
+                <div>
+                    <h2>Your BMI: {bmiData.bmi}</h2>
+                    <p>{bmiData.recommendation}</p>
+                    <canvas id="bmiChart"></canvas>
+                </div>
+            )}
         </div>
-
-        <button type="submit">Calculate BMI</button>
-      </form>
-
-      {/* Display Results */}
-      {result && (
-        <div>
-          <h3>BMI: {result.bmi}</h3>
-          <p>{result.activityMessage}</p>
-        </div>
-      )}
-      
-      {/* Display Errors */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
-  );
-}
+    );
+};
 
 export default App;
