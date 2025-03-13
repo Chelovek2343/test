@@ -6,20 +6,19 @@ function App() {
     age: "",
     weight: "",
     height: "",
-    activityLevel: "moderate", // Added activity level state
+    activityLevel: "moderate", // Default activity level
   });
   const [result, setResult] = useState(null);
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
 
+  // Handle form field changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Moderation function to validate inputs before submission
+  // Validation function to check inputs
   const moderate = () => {
-    const { age, weight, height, activityLevel } = formData;
-    
-    // Simple validation check for required fields
+    const { age, weight, height } = formData;
     if (!age || !weight || !height) {
       setError("Please fill in all the fields!");
       return false;
@@ -33,21 +32,23 @@ function App() {
     return true;
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setResult(null);
+    setError(""); // Reset error message
+    setResult(null); // Reset result
 
-    // Validate before submitting
+    // Validate form data before sending to backend
     if (!moderate()) {
       return;
     }
 
     try {
+      // Send POST request to Flask API with form data
       const response = await axios.post("http://127.0.0.1:5000/predict", formData, {
         headers: { "Content-Type": "application/json" }
       });
-      setResult(response.data);
+      setResult(response.data); // Set response data in state
     } catch (err) {
       setError("Error connecting to the server.");
     }
@@ -93,7 +94,15 @@ function App() {
         <button type="submit">Calculate BMI</button>
       </form>
 
-      {result && <h3>BMI: {result.bmi}</h3>}
+      {/* Display Results */}
+      {result && (
+        <div>
+          <h3>BMI: {result.bmi}</h3>
+          <p>{result.activityMessage}</p>
+        </div>
+      )}
+      
+      {/* Display Errors */}
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
