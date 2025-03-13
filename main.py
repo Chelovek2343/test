@@ -1,39 +1,32 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS
+import numpy as np
+import joblib  # For loading the ML model (later)
+import os
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all domains (you can restrict it to specific origins later)
+
+# Sample Health Risk Prediction Model (Placeholder)
+def predict_health_risk(data):
+    age, weight, height, activity = data["age"], data["weight"], data["height"], data["activity"]
+    bmi = weight / (height ** 2)
+    
+    # Placeholder logic for risk (Replace with AI model later)
+    risk_score = (age / 100) + (bmi / 40) - (0.1 if activity == "active" else 0)
+
+    if risk_score > 0.8:
+        risk = "High"
+    elif risk_score > 0.5:
+        risk = "Moderate"
+    else:
+        risk = "Low"
+
+    return {"bmi": round(bmi, 2), "risk_score": round(risk_score, 2), "risk_category": risk}
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    data = request.json  # Get data sent in JSON format
-
-    # Check if all fields are provided
-    if not data or not data.get("age") or not data.get("weight") or not data.get("height"):
-        return jsonify({"error": "Missing required fields"}), 400
-
-    # Get data from the request
-    age = float(data.get("age"))
-    weight = float(data.get("weight"))
-    height = float(data.get("height"))
-    activity_level = data.get("activityLevel", "moderate")
-
-    # Simple BMI Calculation
-    bmi = round(weight / (height ** 2), 2)
-
-    # Provide activity-level-based suggestions
-    if activity_level == "sedentary":
-        activity_message = "Consider adding light physical activity to your routine."
-    elif activity_level == "moderate":
-        activity_message = "Great! Keep up the moderate activity."
-    else:
-        activity_message = "You're active! Keep challenging yourself."
-
-    return jsonify({
-        "bmi": bmi,
-        "activityMessage": activity_message,
-        "message": "Prediction successful!"
-    })
+    data = request.json
+    result = predict_health_risk(data)
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run(debug=True)
