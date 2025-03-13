@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Enable CORS
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
-CORS(app)  # Allow frontend requests
+CORS(app, resources={r"/predict": {"origins": "http://localhost:3000"}})  # Allow React frontend
 
 @app.route("/", methods=["GET"])
 def home():
